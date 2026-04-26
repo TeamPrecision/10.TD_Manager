@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TD Manager — User Guide</title>
+  <style>
+    :root {
+      --bg: #080808;
+      --surface: #0f0f0f;
+      --border: #1e0606;
+      --red: #cc0000;
+      --red-bright: #ff4444;
+      --text: #e0e0e0;
+      --muted: #888;
+      --dim: #444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: #0a0000;
+      border-bottom: 1px solid #2a0000;
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-title {
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--red-bright);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px #ff444466;
+    }
+    .topbar-sub {
+      font-family: monospace;
+      font-size: 0.65rem;
+      color: var(--dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .topbar-divider { flex: 1; height: 1px; background: linear-gradient(90deg, #aa000066, transparent); }
+
+    /* ── Layout ── */
+    .page { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 56px 0 40px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+    .hero h1 {
+      font-family: monospace;
+      font-size: 2rem;
+      color: var(--red-bright);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      text-shadow: 0 0 20px #ff000066, 0 0 50px #ff000033;
+      margin-bottom: 8px;
+    }
+    .hero p { color: var(--muted); font-family: monospace; font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--red);
+      padding: 20px 24px;
+      margin-bottom: 48px;
+      border-radius: 2px;
+    }
+    .toc h2 { font-family: monospace; font-size: 0.7rem; color: var(--red); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px; }
+    .toc ol { padding-left: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 32px; }
+    .toc li a { color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .toc li a:hover { color: var(--red-bright); }
+
+    /* ── Sections ── */
+    section { margin-bottom: 48px; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-num {
+      font-family: monospace;
+      font-size: 0.65rem;
+      color: var(--red);
+      background: #1a0000;
+      border: 1px solid #440000;
+      padding: 2px 8px;
+      letter-spacing: 0.1em;
+    }
+    .section-header h2 { font-size: 1.05rem; font-weight: 600; color: #f0f0f0; letter-spacing: 0.04em; }
+
+    p { margin-bottom: 12px; color: #c8c8c8; }
+
+    /* ── Account table ── */
+    .account-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 16px; }
+    .account-table th {
+      font-family: monospace; font-size: 0.65rem; color: var(--red);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 8px 12px; text-align: left;
+      border-bottom: 1px solid #330000; background: #0d0000;
+    }
+    .account-table td { padding: 10px 12px; border-bottom: 1px solid #110505; color: #ccc; }
+    .account-table tr:hover td { background: #0e0000; }
+    .mono { font-family: monospace; font-size: 0.82rem; }
+
+    .badge {
+      display: inline-block; padding: 2px 8px;
+      font-family: monospace; font-size: 0.65rem;
+      letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px;
+    }
+    .badge-leader  { background: #2a0000; color: #ff4444; border: 1px solid #550000; }
+    .badge-debug   { background: #001a2a; color: #44aaff; border: 1px solid #00335a; }
+    .badge-coding  { background: #00180a; color: #00cc66; border: 1px solid #005522; }
+    .badge-fixture { background: #1a1200; color: #ffaa00; border: 1px solid #553300; }
+    .badge-purch   { background: #12001a; color: #cc66ff; border: 1px solid #440055; }
+
+    /* ── Feature cards ── */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 16px 18px; position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; right: 0;
+      width: 12px; height: 12px;
+      border-top: 1px solid #cc000055; border-right: 1px solid #cc000055;
+    }
+    .card:hover { border-color: #660000; box-shadow: 0 0 16px rgba(255,0,0,0.08); }
+    .card-icon { font-size: 1.3rem; margin-bottom: 8px; }
+    .card h3 { font-size: 0.9rem; font-weight: 600; color: #e8e8e8; margin-bottom: 6px; }
+    .card p { font-size: 0.82rem; color: var(--muted); margin: 0; }
+
+    /* ── Permission matrix ── */
+    .perm-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 16px; }
+    .perm-table th {
+      font-family: monospace; font-size: 0.62rem; color: var(--red);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 8px 10px; text-align: center;
+      border-bottom: 1px solid #330000; background: #0d0000;
+    }
+    .perm-table th:first-child { text-align: left; }
+    .perm-table td { padding: 8px 10px; border-bottom: 1px solid #0f0303; color: #bbb; text-align: center; }
+    .perm-table td:first-child { text-align: left; color: #ddd; }
+    .perm-table tr:hover td { background: #0a0000; }
+    .yes { color: #00cc66; font-weight: bold; }
+    .no  { color: #444; }
+
+    /* ── Step list ── */
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+    .steps li::before {
+      content: counter(step);
+      font-family: monospace; font-size: 0.7rem;
+      min-width: 24px; height: 24px;
+      background: #1a0000; border: 1px solid #440000; color: var(--red);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .steps li p { margin: 0; font-size: 0.9rem; color: #ccc; }
+    .steps li strong { color: #e8e8e8; }
+
+    /* ── Callouts ── */
+    .tip {
+      background: #0a0500; border: 1px solid #331100; border-left: 3px solid #ff6600;
+      padding: 12px 16px; margin-bottom: 12px; font-size: 0.85rem; color: #bbb;
+    }
+    .tip strong { color: #ff8833; }
+    .note {
+      background: #000a08; border: 1px solid #003322; border-left: 3px solid #00cc66;
+      padding: 12px 16px; margin-bottom: 12px; font-size: 0.85rem; color: #bbb;
+    }
+    .note strong { color: #00cc66; }
+
+    /* ── Status list ── */
+    .status-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 24px; }
+    .status-list li { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #bbb; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Footer ── */
+    footer { margin-top: 64px; border-top: 1px solid var(--border); padding-top: 24px; text-align: center; }
+    footer p { font-family: monospace; font-size: 0.65rem; color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; }
+
+    @media (max-width: 600px) {
+      .toc ol { grid-template-columns: 1fr; }
+      .card-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">TD Manager</span>
+  <span class="topbar-sub">// User Guide</span>
+  <div class="topbar-divider"></div>
+  <span class="topbar-sub">Internal Use Only</span>
+</div>
+
+<div class="page">
+
+  <div class="hero">
+    <h1>TD Manager</h1>
+    <p>Test Developer System — Internal User Guide</p>
+  </div>
+
+  <div class="toc">
+    <h2>// Contents</h2>
+    <ol>
+      <li><a href="#accounts">Accounts &amp; Roles</a></li>
+      <li><a href="#login">Logging In</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#tickets">Tickets</a></li>
+      <li><a href="#purchasing">Purchasing</a></li>
+      <li><a href="#customer-items">Customer Items</a></li>
+      <li><a href="#activity-log">Activity Log</a></li>
+      <li><a href="#fixture">Fixture</a></li>
+      <li><a href="#tester-status">Tester Status</a></li>
+      <li><a href="#permissions">Permissions Matrix</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. Accounts -->
+  <section id="accounts">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Accounts &amp; Roles</h2>
+    </div>
+    <p>There are three role levels in TD Manager. Each role controls which pages are visible and what actions can be performed.</p>
+
+    <table class="account-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Access</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Leader</strong></td>
+          <td class="mono">leader@td.local</td>
+          <td><span class="badge badge-leader">Leader</span></td>
+          <td>Full access to all pages and actions</td>
+        </tr>
+        <tr>
+          <td><strong>Debug 1</strong></td>
+          <td class="mono">debug1@td.local</td>
+          <td><span class="badge badge-debug">Debug</span></td>
+          <td rowspan="2">Projects, Tester Status, Purchasing (request only), Customer Items (add only), Activity Log, Tickets</td>
+        </tr>
+        <tr>
+          <td><strong>Debug 2</strong></td>
+          <td class="mono">debug2@td.local</td>
+          <td><span class="badge badge-debug">Debug</span></td>
+        </tr>
+        <tr>
+          <td><strong>Coding 1</strong></td>
+          <td class="mono">coding1@td.local</td>
+          <td><span class="badge badge-coding">Coding</span></td>
+          <td rowspan="2">Same as Debug</td>
+        </tr>
+        <tr>
+          <td><strong>Coding 2</strong></td>
+          <td class="mono">coding2@td.local</td>
+          <td><span class="badge badge-coding">Coding</span></td>
+        </tr>
+        <tr>
+          <td><strong>Fixture</strong></td>
+          <td class="mono">fixture@td.local</td>
+          <td><span class="badge badge-fixture">Fixture</span></td>
+          <td>Projects, Tester Status, Purchasing (request only), Customer Items (add only), Activity Log, Tickets</td>
+        </tr>
+        <tr>
+          <td><strong>Purchasing</strong></td>
+          <td class="mono">purchasing@td.local</td>
+          <td><span class="badge badge-purch">Purchasing</span></td>
+          <td>Projects (view only), Tester Status, Purchasing (full), Activity Log, Tickets</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>Note:</strong> Access is enforced both on the sidebar (which hides unavailable pages) and on the server — direct URL access to restricted pages is blocked.
+    </div>
+  </section>
+
+  <!-- 2. Login -->
+  <section id="login">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Logging In</h2>
+    </div>
+    <ul class="steps">
+      <li><p>Open the system URL in your browser. You will be taken to the <strong>Login</strong> page.</p></li>
+      <li><p>Enter your <strong>email</strong> and <strong>password</strong>, then click <strong>Login</strong>.</p></li>
+      <li><p>After a successful login you are redirected to the <strong>Projects</strong> page.</p></li>
+      <li><p>To log out, click your name/avatar at the bottom of the left sidebar, then click <strong>Logout</strong>.</p></li>
+    </ul>
+    <div class="tip">
+      <strong>Tip:</strong> If you see "Invalid credentials", double-check that Caps Lock is off and you are using the correct email address.
+    </div>
+  </section>
+
+  <!-- 3. Projects -->
+  <section id="projects">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Projects</h2>
+    </div>
+    <p>The Projects page is the main dashboard. It lists all active projects with their progress, current stage, and key dates.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">📋</div>
+        <h3>Project Table</h3>
+        <p>Shows all projects with fixture, current process stage, progress bar, delivery date, and open ticket count. Click any project name to open its detail page.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <h3>Search &amp; Filter</h3>
+        <p>Use the search bar to find projects by name, customer, or fixture. Use the <strong>Filter</strong> button for column-level filters. Click stage pills at the top to filter by process stage.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">➕</div>
+        <h3>New Project <span style="color:#cc0000;font-size:0.75rem">(Leader)</span></h3>
+        <p>Leaders can click <strong>+ New Project</strong> to create a project. Enter the project name and customer, then save.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h3>Export</h3>
+        <p>Use <strong>Copy</strong> to copy the table as tab-separated data (paste into Excel), or <strong>Image</strong> to download a screenshot of the table.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:0.9rem;color:#ddd;margin:20px 0 10px">Inside a Project</h3>
+    <p>Clicking a project opens its detail page with two main sections:</p>
+    <ul style="padding-left:20px;color:#bbb;font-size:0.9rem;line-height:2">
+      <li><strong style="color:#ddd">Process List</strong> — tracks each stage (RFQ → Delivered). Click a stage status dot to mark it Done/Pending. Add comments and attach file/SVN links per stage.</li>
+      <li><strong style="color:#ddd">Fixture Manager</strong> — manage fixtures and FGs (Functional Groups) for the project. Add, rename, or delete fixtures and FGs.</li>
+    </ul>
+    <div class="tip">
+      <strong>Note:</strong> Purchasing members see the project detail in read-only mode — no edits are allowed.
+    </div>
+  </section>
+
+  <!-- 4. Tickets -->
+  <section id="tickets">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Tickets</h2>
+    </div>
+    <p>The Tickets page tracks bugs, hardware issues, software issues, requests, and other problems linked to a project.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🎫</div>
+        <h3>Creating a Ticket</h3>
+        <p>Click <strong>+ New Ticket</strong>. Fill in the title, project, type, and priority. Add a description and an optional deadline, then click <strong>Create</strong>.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">👤</div>
+        <h3>Assigning <span style="color:#cc0000;font-size:0.75rem">(Leader)</span></h3>
+        <p>Drag a team member's avatar from the <em>Drag to Assign</em> strip and drop it onto any ticket row. Hover the avatar on a row and click ✕ to unassign.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔄</div>
+        <h3>Changing Status</h3>
+        <p>Click the status badge on a ticket you are assigned to. Choose the next state. The normal flow is: Open → In Progress → Resolved.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📈</div>
+        <h3>Analyze</h3>
+        <p>Click <strong>Analyze</strong> to see charts summarising ticket volume, type distribution, and priority across all projects.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:0.9rem;color:#ddd;margin:16px 0 8px">Ticket Statuses</h3>
+    <ul class="status-list">
+      <li><span class="dot" style="background:#ffaa00"></span><strong>Open</strong> — Awaiting action (Leader must start it)</li>
+      <li><span class="dot" style="background:#4488ff"></span><strong>In Progress</strong> — Being worked on</li>
+      <li><span class="dot" style="background:#00cc66"></span><strong>Resolved</strong> — Fixed and closed</li>
+      <li><span class="dot" style="background:#cc3333"></span><strong>Rejected</strong> — Not accepted (Leader only)</li>
+    </ul>
+
+    <div class="tip" style="margin-top:16px">
+      <strong>External reports:</strong> The <strong>Report a ticket</strong> link on the login page lets anyone submit a ticket without logging in — for department staff or external reporters.
+    </div>
+  </section>
+
+  <!-- 5. Purchasing -->
+  <section id="purchasing">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Purchasing</h2>
+    </div>
+    <p>Tracks all components and parts ordered for the projects — quantities, prices, PR numbers, sources, and delivery status.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">➕</div>
+        <h3>Add Item <span style="color:#cc0000;font-size:0.75rem">(Leader / Purchasing)</span></h3>
+        <p>Click <strong>Add Item</strong> to register a new component. Enter the name, PR number, source/vendor, quantity, price, and initial status.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <h3>Withdraw (Request Stock)</h3>
+        <p>Click the arrow icon on any item to withdraw stock for a specific project and fixture. Enter quantity and optional notes. Available to all members.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔄</div>
+        <h3>Change Status <span style="color:#cc0000;font-size:0.75rem">(Leader / Purchasing)</span></h3>
+        <p>Click the status badge on an item to toggle between <strong>Ordered</strong> and <strong>Received</strong>. Add a comment for the audit trail.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🗑️</div>
+        <h3>Delete Item <span style="color:#cc0000;font-size:0.75rem">(Leader / Purchasing)</span></h3>
+        <p>Click the trash icon to delete an item. A comment is required explaining the reason for removal.</p>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Remaining column:</strong> Shows stock left after all withdrawals. <span style="color:#ff4444">Red</span> = fully issued, <span style="color:#ffaa00">Yellow</span> = partially issued, <span style="color:#00cc66">Green</span> = full stock available.
+    </div>
+  </section>
+
+  <!-- 6. Customer Items -->
+  <section id="customer-items">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Customer Items</h2>
+    </div>
+    <p>Tracks customer-provided equipment and sample boards received for testing.</p>
+
+    <ul class="steps">
+      <li><p>Click <strong>+ Add Item</strong> or <strong>+ Add Sample Board</strong> to register a new item. Link it to a project and fixture.</p></li>
+      <li><p>Items start as <strong>Pending</strong>. When work begins, a Leader changes the status to <strong>In Progress</strong>.</p></li>
+      <li><p>Once testing is complete, the Leader sets the status to <strong>Received</strong>. This is a final state — it cannot be reversed by anyone.</p></li>
+      <li><p>Click an item row to expand it and view its full history of comments and status changes.</p></li>
+    </ul>
+
+    <div class="tip">
+      <strong>Permissions:</strong> Debug, Coding, and Fixture members can add items but cannot change status or delete. Only the Leader can change status or delete items.
+    </div>
+  </section>
+
+  <!-- 7. Activity Log -->
+  <section id="activity-log">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Activity Log</h2>
+    </div>
+    <p>A read-only audit trail of all significant actions taken in the system — project updates, status changes, item additions, ticket movements, and more.</p>
+    <p>Use the filters at the top to narrow results by date range, user, entity type, or action. The log is sorted newest first.</p>
+    <div class="note">
+      <strong>Note:</strong> Every status change includes the comment left by the user, providing full context for each transition.
+    </div>
+  </section>
+
+  <!-- 8. Fixture page -->
+  <section id="fixture">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>Fixture</h2>
+    </div>
+    <p>Available to <strong>Leader</strong> only. This page provides a global view of all fixtures and their associated FGs across all projects.</p>
+    <p>Use it to quickly see which fixtures exist, which FGs they contain, and navigate directly into the relevant project detail page.</p>
+  </section>
+
+  <!-- 9. Tester Status -->
+  <section id="tester-status">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>Tester Status</h2>
+    </div>
+    <p>Shows the live status of all registered tester PCs — whether they are running, which FG they are testing, pass/fail counts, and last heartbeat time.</p>
+    <ul class="status-list" style="margin-bottom:16px">
+      <li><span class="dot" style="background:#00cc66"></span><strong>Running</strong> — Actively performing a test cycle</li>
+      <li><span class="dot" style="background:#444"></span><strong>Offline</strong> — Not seen recently</li>
+    </ul>
+    <p>The page auto-refreshes. Each tester card shows its PC name, AnyDesk ID, current project/FG, and cycle pass/fail counts.</p>
+  </section>
+
+  <!-- 10. Permissions -->
+  <section id="permissions">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>Permissions Matrix</h2>
+    </div>
+    <p>Quick reference for what each role can do on each page.</p>
+
+    <table class="perm-table">
+      <thead>
+        <tr>
+          <th>Page / Action</th>
+          <th><span class="badge badge-leader">Leader</span></th>
+          <th><span class="badge badge-debug">Debug / Coding / Fixture</span></th>
+          <th><span class="badge badge-purch">Purchasing</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Projects</strong> — View list</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><strong>Projects</strong> — Create / Edit / Delete</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td><strong>Projects</strong> — Edit stages, comments, links</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">View only</td></tr>
+        <tr><td><strong>Tickets</strong> — Create</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><strong>Tickets</strong> — Assign members</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td><strong>Tickets</strong> — Change status (if assigned)</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><strong>Tickets</strong> — Reject ticket</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td><strong>Purchasing</strong> — View items</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><strong>Purchasing</strong> — Add / Delete items</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td></tr>
+        <tr><td><strong>Purchasing</strong> — Change status (Ordered ↔ Received)</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td></tr>
+        <tr><td><strong>Purchasing</strong> — Withdraw / Request stock</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><strong>Customer Items</strong> — View</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>
+        <tr><td><strong>Customer Items</strong> — Add items</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>
+        <tr><td><strong>Customer Items</strong> — Change status / Delete</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td><strong>Activity Log</strong></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td><strong>Fixture</strong> page</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td><strong>Tester Status</strong></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
+
+<footer>
+  <div style="max-width:900px;margin:0 auto;padding:0 24px">
+    <p>TD Manager — Internal System — Not for external distribution</p>
+  </div>
+</footer>
+
+</body>
+</html>

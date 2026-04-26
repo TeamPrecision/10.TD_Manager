@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npx create-next-app@latest td-manager --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes)",
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(npx.cmd prisma *)",
+      "Bash(./node_modules/.bin/prisma generate *)",
+      "Bash(mkdir -p \"C:/Users/User/Desktop/New folder \\(2\\)/td-manager/app/\\(app\\)/projects/[id]\")",
+      "Bash(mkdir -p \"C:/Users/User/Desktop/New folder \\(2\\)/td-manager/app/api/projects/[id]\")",
+      "Bash(mkdir -p \"C:/Users/User/Desktop/New folder \\(2\\)/td-manager/app/api/auth/[...nextauth]\")",
+      "Bash(mv \"C:/Users/User/Desktop/New folder \\(2\\)/td-manager/app/api/auth/nextauth/route.ts\" \"C:/Users/User/Desktop/New folder \\(2\\)/td-manager/app/api/auth/[...nextauth]/route.ts\")",
+      "Bash(npm run *)",
+      "Bash(echo \"Started PID: $!\")",
+      "Read(//tmp/**)",
+      "Bash(curl -s -X POST http://localhost:3000/api/seed)",
+      "Bash(pkill -f \"next dev\")",
+      "PowerShell(Stop-Process *)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(curl *)",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(f\\\\\"{t['pcName']}: running={t['isRunning']}, pass={t['passCount']}, fail={t['failCount']}\\\\\"\\) for t in data]\")",
+      "Bash(tree -L 3 \"/c/Users/User/Desktop/New folder \\(2\\)/td-manager\" --ignore \"node_modules|.next\")",
+      "Skill(update-config)",
+      "Bash(node -e \"require\\('child_process'\\).execSync\\('npx prisma db push', {stdio:'inherit'}\\)\")",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(node -e \"require\\('child_process'\\).execSync\\('npx prisma db push --skip-generate', {stdio:'inherit'}\\)\")",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

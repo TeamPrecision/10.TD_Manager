@@ -1,0 +1,369 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String                  @id @default(cuid())
+  name                 String
+  email                String                  @unique
+  password             String
+  role                 String                  @default("MEMBER")
+  subRole              String?
+  createdAt            DateTime                @default(now())
+  tasks                Task[]
+  issues               Issue[]
+  assignedIssues       IssueAssignment[]
+  issueComments        IssueComment[]
+  svnLinks             SvnLink[]
+  processComments      ProcessComment[]
+  processLinks         ProcessLink[]
+  subItemComments      ProcessSubItemComment[]
+  subItemLinks         ProcessSubItemLink[]
+  itemComments         ItemComment[]
+  itemIssues           ItemIssue[]
+  customerItemComments CustomerItemComment[]
+  activityLogs         ActivityLog[]
+}
+
+model Project {
+  id            String           @id @default(cuid())
+  name          String
+  customer      String
+  stage         String           @default("RFQ")
+  startDate     DateTime?
+  targetDate    DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  tasks         Task[]
+  issues        Issue[]
+  items         Item[]
+  svnLinks      SvnLink[]
+  testers       Tester[]
+  cycleRuns     CycleRun[]
+  processes     ProjectProcess[]
+  fixtures      Fixture[]
+  subItems      ProcessSubItem[]
+  itemIssues    ItemIssue[]
+  customerItems CustomerItem[]
+}
+
+model Fixture {
+  id            String         @id @default(cuid())
+  name          String
+  projectId     String
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fgs           ProjectFG[]
+  items         Item[]
+  itemIssues    ItemIssue[]
+  customerItems CustomerItem[]
+  createdAt     DateTime       @default(now())
+}
+
+model ProjectFG {
+  id            String         @id @default(cuid())
+  name          String
+  model         String
+  fixtureId     String
+  fixture       Fixture        @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  customerItems CustomerItem[]
+  createdAt     DateTime       @default(now())
+}
+
+model ProcessSubItem {
+  id        String                  @id @default(cuid())
+  projectId String
+  project   Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stageKey  String
+  refId     String
+  refType   String
+  status    String                  @default("PENDING")
+  deadline  DateTime?
+  comments  ProcessSubItemComment[]
+  links     ProcessSubItemLink[]
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+
+  @@unique([projectId, stageKey, refId])
+}
+
+model ProcessSubItemComment {
+  id        String         @id @default(cuid())
+  subItemId String
+  subItem   ProcessSubItem @relation(fields: [subItemId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?          @relation(fields: [userId], references: [id])
+  type      String         @default("COMMENT")
+  newStatus String?
+  text      String
+  createdAt DateTime       @default(now())
+}
+
+model ProcessSubItemLink {
+  id        String         @id @default(cuid())
+  subItemId String
+  subItem   ProcessSubItem @relation(fields: [subItemId], references: [id], onDelete: Cascade)
+  label     String
+  url       String
+  revision  String?
+  addedById String?
+  addedBy   User?          @relation(fields: [addedById], references: [id])
+  createdAt DateTime       @default(now())
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  status      String    @default("OPEN")
+  priority    String    @default("MEDIUM")
+  dueDate     DateTime?
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assigneeId  String?
+  assignee    User?     @relation(fields: [assigneeId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+model Issue {
+  id            String            @id @default(cuid())
+  title         String
+  type          String            @default("BUG")
+  description   String?
+  solution      String?
+  status        String            @default("OPEN")
+  priority      String            @default("MEDIUM")
+  deadline      DateTime?
+  projectId     String
+  project       Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reporterId    String?
+  reporter      User?             @relation(fields: [reporterId], references: [id])
+  reporterName  String?
+  reporterDept  String?
+  assignees     IssueAssignment[]
+  comments      IssueComment[]
+  images        IssueImage[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model IssueComment {
+  id        String   @id @default(cuid())
+  issueId   String
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  type      String   @default("COMMENT")
+  text      String
+  newStatus String?
+  createdAt DateTime @default(now())
+}
+
+model IssueImage {
+  id        String   @id @default(cuid())
+  issueId   String
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  section   String   @default("PROBLEM")
+  name      String
+  data      Bytes
+  mimeType  String
+  size      Int
+  createdAt DateTime @default(now())
+}
+
+model IssueAssignment {
+  id      String @id @default(cuid())
+  issueId String
+  issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([issueId, userId])
+}
+
+model Item {
+  id        String        @id @default(cuid())
+  name      String
+  quantity  Int           @default(1)
+  unit      String?
+  source    String?
+  price     Float?
+  nre       String?
+  pr        String?
+  status    String        @default("ORDERED")
+  projectId String?
+  project   Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  fixtureId String?
+  fixture   Fixture?      @relation(fields: [fixtureId], references: [id], onDelete: SetNull)
+  issues    ItemIssue[]
+  comments  ItemComment[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ItemIssue {
+  id        String   @id @default(cuid())
+  itemId    String
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fixtureId String
+  fixture   Fixture  @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  quantity  Int      @default(1)
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityName String?
+  detail     String?
+  comment    String?
+  createdAt  DateTime @default(now())
+}
+
+model ItemComment {
+  id        String   @id @default(cuid())
+  itemId    String
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  type      String   @default("COMMENT")
+  newStatus String?
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model CustomerItem {
+  id        String               @id @default(cuid())
+  name      String
+  quantity  Int                  @default(1)
+  unit      String?
+  notes     String?
+  status    String               @default("PENDING")
+  projectId String?
+  project   Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  fixtureId String?
+  fixture   Fixture?             @relation(fields: [fixtureId], references: [id], onDelete: SetNull)
+  fgId      String?
+  fg        ProjectFG?           @relation(fields: [fgId], references: [id], onDelete: SetNull)
+  comments  CustomerItemComment[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+}
+
+model CustomerItemComment {
+  id             String       @id @default(cuid())
+  customerItemId String
+  customerItem   CustomerItem @relation(fields: [customerItemId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?        @relation(fields: [userId], references: [id])
+  type           String       @default("COMMENT")
+  newStatus      String?
+  text           String
+  createdAt      DateTime     @default(now())
+}
+
+model SvnLink {
+  id        String   @id @default(cuid())
+  label     String
+  url       String
+  revision  String?
+  category  String
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  addedById String?
+  addedBy   User?    @relation(fields: [addedById], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Tester {
+  id        String    @id @default(cuid())
+  pcName    String    @unique
+  anyDeskId String?
+  projectId String?
+  project   Project?  @relation(fields: [projectId], references: [id])
+  currentFg String?
+  mode      String?
+  isRunning Boolean   @default(false)
+  passCount Int       @default(0)
+  failCount Int       @default(0)
+  lastSeen  DateTime?
+  apiKey    String    @unique @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model CycleRun {
+  id          String   @id @default(cuid())
+  fgType      String
+  targetCount Int      @default(30)
+  passCount   Int      @default(0)
+  failCount   Int      @default(0)
+  status      String   @default("RUNNING")
+  graphSvnUrl String?
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProjectProcess {
+  id        String           @id @default(cuid())
+  projectId String
+  project   Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stageKey  String
+  status    String           @default("PENDING")
+  deadline  DateTime?
+  comments  ProcessComment[]
+  links     ProcessLink[]
+  files     ProcessFile[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@unique([projectId, stageKey])
+}
+
+model ProcessComment {
+  id        String         @id @default(cuid())
+  processId String
+  process   ProjectProcess @relation(fields: [processId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?          @relation(fields: [userId], references: [id])
+  type      String         @default("COMMENT")
+  newStatus String?
+  text      String
+  createdAt DateTime       @default(now())
+}
+
+model ProcessLink {
+  id        String         @id @default(cuid())
+  processId String
+  process   ProjectProcess @relation(fields: [processId], references: [id], onDelete: Cascade)
+  label     String
+  url       String
+  revision  String?
+  addedById String?
+  addedBy   User?          @relation(fields: [addedById], references: [id])
+  createdAt DateTime       @default(now())
+}
+
+model ProcessFile {
+  id        String         @id @default(cuid())
+  processId String
+  process   ProjectProcess @relation(fields: [processId], references: [id], onDelete: Cascade)
+  name      String
+  data      Bytes
+  mimeType  String
+  size      Int
+  createdAt DateTime       @default(now())
+}
