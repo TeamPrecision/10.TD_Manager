@@ -15,7 +15,7 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   const session = await auth();
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const uid = (session.user as Record<string, unknown>)?.id as string | undefined;
+  const uid = session.user?.id;
   const existing = await prisma.fixture.findUnique({
     where: { id },
     select: { name: true, project: { select: { name: true } } },

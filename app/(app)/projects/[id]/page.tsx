@@ -11,8 +11,8 @@ export const dynamic = "force-dynamic";
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  const role = (session?.user as Record<string, unknown>)?.role as string ?? "MEMBER";
-  const subRole = (session?.user as Record<string, unknown>)?.subRole as string | null ?? null;
+  const role = session?.user?.role ?? "MEMBER";
+  const subRole = session?.user?.subRole ?? null;
   const canEdit = role === "LEADER" || subRole !== "PURCHASING";
   const project = await prisma.project.findUnique({
     where: { id },

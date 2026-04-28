@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
 
 export default async function PurchasingPage() {
   const session = await auth();
-  const role = (session?.user as Record<string, unknown>)?.role as string ?? "MEMBER";
-  const subRole = (session?.user as Record<string, unknown>)?.subRole as string | null ?? null;
+  const role = session?.user?.role ?? "MEMBER";
+  const subRole = session?.user?.subRole ?? null;
 
   const [items, projects] = await Promise.all([
     prisma.item.findMany({

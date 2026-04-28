@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { NextRequest } from "next/server";
 
@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
   const { itemId, text } = await req.json();
-  const userId = (session.user as Record<string, unknown>).id as string | undefined;
+  const userId = session.user?.id;
   const comment = await prisma.itemComment.create({
     data: { itemId, type: "COMMENT", text, userId: userId ?? null },
     include: { user: { select: { name: true } } },

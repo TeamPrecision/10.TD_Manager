@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { NextRequest } from "next/server";
+import type { Session } from "next-auth";
 
 const INCLUDE = {
   project: { select: { id: true, name: true } },
@@ -19,9 +20,8 @@ const INCLUDE = {
   },
 } as const;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function userId(session: any) {
-  return (session?.user as Record<string, unknown>)?.id as string | undefined;
+function userId(session: Session | null) {
+  return session?.user?.id;
 }
 
 export async function GET(req: NextRequest) {

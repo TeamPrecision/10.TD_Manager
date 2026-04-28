@@ -13,10 +13,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
         const email = credentials.email as string;
-        const candidates = await prisma.user.findMany({
-          where: { email: { contains: email } },
-        });
-        const user = candidates.find((u) => u.email === email) ?? null;
+        const user = await prisma.user.findUnique({ where: { email } });
         if (!user) return null;
         const valid = await bcrypt.compare(credentials.password as string, user.password);
         if (!valid) return null;
@@ -27,18 +24,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        const u = user as Record<string, unknown>;
-        token.role    = u.role as string;
-        token.subRole = u.subRole as string | null;
+        token.role    = user.role;
+        token.subRole = user.subRole;
         token.id      = user.id;
       }
       return token;
     },
     session({ session, token }) {
-      const u = session.user as Record<string, unknown>;
-      u.role    = token.role;
-      u.subRole = token.subRole;
-      u.id      = token.id;
+      session.user.role    = (token.role    as string)        ?? "MEMBER";
+      session.user.subRole = (token.subRole as string | null) ?? null;
+      session.user.id      = (token.id      as string)        ?? "";
       return session;
     },
   },

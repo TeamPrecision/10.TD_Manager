@@ -14,7 +14,7 @@ function deriveOverall(statuses: string[]): string | null {
 
 export default async function ProjectsPage() {
   const session = await auth();
-  const isLeader = (session?.user as Record<string, unknown>)?.role === "LEADER";
+  const isLeader = session?.user?.role === "LEADER";
 
   const projects = await prisma.project.findMany({
     include: {

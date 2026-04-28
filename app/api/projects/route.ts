@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { NextRequest } from "next/server";
 
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
   const { name, customer } = await req.json();
   if (!name || !customer) return Response.json({ error: "Missing fields" }, { status: 400 });
-  const uid = (session.user as Record<string, unknown>)?.id as string | undefined;
+  const uid = session.user?.id;
   const project = await prisma.project.create({ data: { name, customer } });
   await prisma.activityLog.create({
     data: { userId: uid ?? null, action: "CREATE", entityType: "PROJECT", entityName: name, detail: customer },

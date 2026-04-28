@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { NextRequest } from "next/server";
 
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  const uid = (session.user as Record<string, unknown>)?.id as string | undefined;
+  const uid = session.user?.id;
 
   const process = await prisma.projectProcess.upsert({
     where: { projectId_stageKey: { projectId, stageKey } },

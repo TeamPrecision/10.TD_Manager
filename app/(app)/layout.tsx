@@ -9,8 +9,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar
-        role={(session.user as Record<string, unknown>).role as string}
-        subRole={(session.user as Record<string, unknown>).subRole as string | null}
+        role={session.user.role}
+        subRole={session.user.subRole}
         userName={session.user.name ?? undefined}
       />
       {/* Traveling scan line */}

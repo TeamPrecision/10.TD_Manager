@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { NextRequest } from "next/server";
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       label,
       url,
       revision: revision || null,
-      addedById: (session.user as Record<string, unknown>).id as string,
+      addedById: session.user!.id,
     },
     include: { addedBy: true },
   });

@@ -1,10 +1,6 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { NextRequest } from "next/server";
-
-function uid(session: unknown) {
-  return ((session as Record<string, unknown>)?.user as Record<string, unknown>)?.id as string | undefined;
-}
 
 export async function POST(req: NextRequest) {
   const session = await auth();

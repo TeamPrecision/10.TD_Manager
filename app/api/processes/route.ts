@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { NextRequest } from "next/server";
 import { PROJECT_STAGES } from "@/lib/utils";
@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest) {
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const { projectId, stageKey, status, deadline, comment } = await req.json();
-  const userId = (session.user as Record<string, unknown>).id as string;
+  const userId = session.user!.id;
 
   const updateData: Record<string, unknown> = {};
   if (status !== undefined) updateData.status = status;
